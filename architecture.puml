@@ -1,6 +1,4 @@
-# Feature Flag using OpenFeature and flagd
-## Architecture
-```plantuml
+@startuml
 title System Interaction Overview
 
 actor Client
@@ -22,3 +20,5 @@ Client --> [flagd] : Checks feature flag
 S3 --> [flagd] : Returns file/data
 [flagd] --> [Server Application] : Returns flag status
 [Server Application] --> Client : Sends response
+
+@enduml
