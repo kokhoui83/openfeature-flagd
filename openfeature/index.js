@@ -1,7 +1,8 @@
 import express from "express";
 import Router from "express-promise-router";
 import cowsay from "cowsay";
-import { OpenFeature, InMemoryProvider } from "@openfeature/server-sdk";
+import { OpenFeature } from "@openfeature/server-sdk";
+import { FlagdProvider } from "@openfeature/flagd-provider";
 
 const app = express();
 const routes = Router();
@@ -12,26 +13,14 @@ app.use((_, res, next) => {
 
 const featureFlags = OpenFeature.getClient();
 
-const FLAG_CONFIGURATION = {
-  'with-cows': {
-    variants: {
-      on: true,
-      off: false
-    },
-    disabled: false,
-    defaultVariant: "off",
-    contextEvaluator: (context) => {
-      if (context.cow === "Bessie") {
-        return "on";
-      }
-      return "off";
-    },
-  }
-};
+// flagd feature flag provider
+const flagdFlagProvider = new FlagdProvider({
+  host: "localhost",
+  port: 8013,
+});
 
-const featureFlagProvider = new InMemoryProvider(FLAG_CONFIGURATION);
-
-OpenFeature.setProvider(featureFlagProvider);
+// set provider
+OpenFeature.setProvider(flagdFlagProvider);
 
 routes.get("/", async (req, res) => {
   const context = {
