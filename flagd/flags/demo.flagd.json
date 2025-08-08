@@ -1,13 +1,21 @@
 {
   "$schema": "https://flagd.dev/schema/v0/flags.json",
   "flags": {
-    "show-welcome-banner": {
+    "new-welcome-message": {
       "state": "ENABLED",
+      "defaultVariant": "true",
       "variants": {
-        "on": true,
-        "off": false
-      },
-      "defaultVariant": "off"
+        "true": true,
+        "false": false
+      }
+    },
+    "show-beta-button": {
+      "state": "ENABLED",
+      "defaultVariant": "true",
+      "variants": {
+        "true": true,
+        "false": false
+      }
     },
     "background-color": {
       "state": "ENABLED",

@@ -34,6 +34,16 @@ routes.get("/", async (req, res) => {
   }
 });
 
+routes.get("/feature", async (req, res) => {
+  const isNewMessage = await featureFlags.getBooleanValue("new-welcome-message", false);
+  const isBetaVisible = await featureFlags.getBooleanValue("show-beta-button", false);
+
+  res.json({
+    isNewMessage,
+    isBetaVisible
+  });
+});
+
 app.listen(3333, () => {
   console.log("Server running at http://localhost:3333");
 });
