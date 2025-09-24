@@ -4,7 +4,7 @@ import { FlagdWebProvider } from '@openfeature/flagd-web-provider';
 const provider = new FlagdWebProvider({
   host: 'localhost',
   port: 8013,
-  tls: false,
+  tls: false
 });
 
 let initializationPromise: Promise<void> | null = null;
