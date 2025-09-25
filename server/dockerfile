@@ -15,4 +15,7 @@ RUN npm ci --omit=dev
 # Bundle app source
 COPY . .
 
+# Expose port 3333
+EXPOSE 3333
+
 CMD [ "node", "index.js" ]

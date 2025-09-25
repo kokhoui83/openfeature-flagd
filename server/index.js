@@ -70,9 +70,21 @@ routes.get("/feature", async (req, res) => {
   const isNewMessage = await featureFlags.getBooleanValue("new-welcome-message", false);
   const isBetaVisible = await featureFlags.getBooleanValue("show-beta-button", false);
 
+  res.setHeader("content-type", "application/json");
   res.json({
     isNewMessage,
     isBetaVisible
+  });
+});
+
+// Health check endpoint
+routes.get("/health", (req, res) => {
+  res.setHeader("content-type", "application/json");
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
