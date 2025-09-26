@@ -1,0 +1,46 @@
+services:
+  flagd:
+    image: ghcr.io/open-feature/flagd:latest
+    volumes:
+      - ./flagd/flags:/flags
+    command: [
+      'start',
+      '--uri',
+      'file:./flags/demo.flagd.json',
+    ]
+    ports:
+      - '8013:8013'
+    networks:
+      - default
+  server:
+    build: ./server
+    environment:
+      - FLAGD_HOST=flagd
+      - FLAGD_PORT=8013
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=3333
+    ports:
+      - '3333:3333'
+    depends_on:
+      - flagd
+    networks:
+      - default
+
+  client:
+    build: ./client
+    environment:
+      - VITE_FLAGD_HOST=flagd
+      - VITE_FLAGD_PORT=8013
+      - VITE_FLAGD_TLS=false
+    ports:
+      - '8080:80'
+    depends_on:
+      - server
+      - flagd
+    networks:
+      - default
+
+networks:
+  default:
+    name: flagd-network
+    driver: bridge

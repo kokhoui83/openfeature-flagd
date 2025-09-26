@@ -1,5 +1,5 @@
 {
-  "name": "openfeature",
+  "name": "server",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@openfeature/flagd-provider": "^0.13.3",
     "@openfeature/server-sdk": "^1.18.0",
     "cowsay": "^1.6.0",
     "express": "^4.21.2",
