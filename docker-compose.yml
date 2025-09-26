@@ -26,6 +26,20 @@ services:
     networks:
       - default
 
+  client:
+    build: ./client
+    environment:
+      - VITE_FLAGD_HOST=flagd
+      - VITE_FLAGD_PORT=8013
+      - VITE_FLAGD_TLS=false
+    ports:
+      - '8080:80'
+    depends_on:
+      - server
+      - flagd
+    networks:
+      - default
+
 networks:
   default:
     name: flagd-network

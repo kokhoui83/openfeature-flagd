@@ -1,11 +1,30 @@
 import { OpenFeature } from '@openfeature/web-sdk';
 import { FlagdWebProvider } from '@openfeature/flagd-web-provider';
 
-const provider = new FlagdWebProvider({
-  host: 'localhost',
-  port: 8013,
-  tls: false
-});
+// Get configuration from environment variables or window.ENV (injected at runtime)
+const getConfig = () => {
+  // Check if window.ENV exists (Docker runtime injection)
+  if (typeof window !== 'undefined' && (window as any).ENV) {
+    const env = (window as any).ENV;
+    return {
+      host: env.FLAGD_HOST || 'localhost',
+      port: parseInt(env.FLAGD_PORT) || 8013,
+      tls: env.FLAGD_TLS === 'true' || false
+    };
+  }
+  
+  // Fallback to import.meta.env (Vite build-time variables)
+  return {
+    host: import.meta.env.VITE_FLAGD_HOST || 'localhost',
+    port: parseInt(import.meta.env.VITE_FLAGD_PORT) || 8013,
+    tls: import.meta.env.VITE_FLAGD_TLS === 'true' || false
+  };
+};
+
+const config = getConfig();
+console.log('FlagdWebProvider config:', config);
+
+const provider = new FlagdWebProvider(config);
 
 let initializationPromise: Promise<void> | null = null;
 
