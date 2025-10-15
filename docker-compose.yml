@@ -39,6 +39,13 @@ services:
       - flagd
     networks:
       - default
+    
+  manager:
+    build: ./manager
+    ports:
+      - '8081:80'
+    networks:
+      - default
 
 networks:
   default:
