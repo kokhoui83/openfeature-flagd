@@ -7,8 +7,43 @@ class FlagService {
   };
 
   constructor() {
-    // Load initial demo data
-    this.loadDemoData();
+    this.loadFlagsFromFile();
+  }
+
+  private async loadFlagsFromFile(): Promise<void> {
+    try {
+      const response = await fetch('/api/flags');
+      if (response.ok) {
+        const data = await response.json();
+        this.flags = data;
+      } else {
+        // If file doesn't exist or can't be read, create with demo data
+        this.loadDemoData();
+        await this.saveFlagsToFile();
+      }
+    } catch (error) {
+      console.warn('Failed to load flags from file, using demo data:', error);
+      this.loadDemoData();
+    }
+  }
+
+  private async saveFlagsToFile(): Promise<void> {
+    try {
+      const response = await fetch('/api/flags', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.flags, null, 2)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save flags: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to save flags to file:', error);
+      throw error;
+    }
   }
 
   private loadDemoData() {
@@ -48,7 +83,8 @@ class FlagService {
     };
   }
 
-  getAllFlags(): FlagConfig {
+  async getAllFlags(): Promise<FlagConfig> {
+    await this.loadFlagsFromFile();
     return { ...this.flags };
   }
 
@@ -56,40 +92,71 @@ class FlagService {
     return this.flags.flags[key];
   }
 
-  createFlag(key: string, flag: Flag): boolean {
+  async createFlag(key: string, flag: Flag): Promise<boolean> {
     if (this.flags.flags[key]) {
       return false; // Flag already exists
     }
     this.flags.flags[key] = { ...flag };
-    return true;
+    try {
+      await this.saveFlagsToFile();
+      return true;
+    } catch (error) {
+      // Rollback on save error
+      delete this.flags.flags[key];
+      return false;
+    }
   }
 
-  updateFlag(key: string, flag: Flag): boolean {
+  async updateFlag(key: string, flag: Flag): Promise<boolean> {
     if (!this.flags.flags[key]) {
       return false; // Flag doesn't exist
     }
+    const oldFlag = { ...this.flags.flags[key] };
     this.flags.flags[key] = { ...flag };
-    return true;
+    try {
+      await this.saveFlagsToFile();
+      return true;
+    } catch (error) {
+      // Rollback on save error
+      this.flags.flags[key] = oldFlag;
+      return false;
+    }
   }
 
-  deleteFlag(key: string): boolean {
+  async deleteFlag(key: string): Promise<boolean> {
     if (!this.flags.flags[key]) {
       return false; // Flag doesn't exist
     }
+    const deletedFlag = { ...this.flags.flags[key] };
     delete this.flags.flags[key];
-    return true;
+    try {
+      await this.saveFlagsToFile();
+      return true;
+    } catch (error) {
+      // Rollback on save error
+      this.flags.flags[key] = deletedFlag;
+      return false;
+    }
   }
 
   exportConfig(): string {
     return JSON.stringify(this.flags, null, 2);
   }
 
-  importConfig(configJson: string): boolean {
+  async importConfig(configJson: string): Promise<boolean> {
     try {
       const config = JSON.parse(configJson) as FlagConfig;
       if (config.flags && typeof config.flags === 'object') {
+        const oldFlags = { ...this.flags };
         this.flags = config;
-        return true;
+        try {
+          await this.saveFlagsToFile();
+          return true;
+        } catch (error) {
+          // Rollback on save error
+          this.flags = oldFlags;
+          return false;
+        }
       }
       return false;
     } catch (error) {

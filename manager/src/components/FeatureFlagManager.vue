@@ -32,8 +32,13 @@ const flagCount = computed(() => ({
   disabled: Object.values(flags.value.flags).filter(f => f.state === 'DISABLED').length
 }));
 
-const loadFlags = () => {
-  flags.value = flagService.getAllFlags();
+const loadFlags = async () => {
+  try {
+    flags.value = await flagService.getAllFlags();
+  } catch (error) {
+    console.error('Failed to load flags:', error);
+    alert('Failed to load flags from file');
+  }
 };
 
 const handleCreateFlag = () => {
@@ -49,35 +54,65 @@ const handleEditFlag = (key: string) => {
   }
 };
 
-const handleDeleteFlag = (key: string) => {
-  flagService.deleteFlag(key);
-  loadFlags();
+const handleDeleteFlag = async (key: string) => {
+  try {
+    const success = await flagService.deleteFlag(key);
+    if (success) {
+      loadFlags();
+    } else {
+      alert('Failed to delete flag');
+    }
+  } catch (error) {
+    console.error('Failed to delete flag:', error);
+    alert('Failed to delete flag');
+  }
 };
 
-const handleToggleState = (key: string) => {
+const handleToggleState = async (key: string) => {
   const flag = flagService.getFlag(key);
   if (flag) {
     const newFlag = { ...flag, state: flag.state === 'ENABLED' ? 'DISABLED' as const : 'ENABLED' as const };
-    flagService.updateFlag(key, newFlag);
-    loadFlags();
+    try {
+      const success = await flagService.updateFlag(key, newFlag);
+      if (success) {
+        loadFlags();
+      } else {
+        alert('Failed to update flag state');
+      }
+    } catch (error) {
+      console.error('Failed to update flag state:', error);
+      alert('Failed to update flag state');
+    }
   }
 };
 
-const handleSaveFlag = (key: string, flag: Flag) => {
+const handleSaveFlag = async (key: string, flag: Flag) => {
   const isEdit = editingFlag.value !== null;
   
-  if (isEdit) {
-    flagService.updateFlag(key, flag);
-  } else {
-    if (!flagService.createFlag(key, flag)) {
-      alert('A flag with this key already exists!');
-      return;
+  try {
+    let success = false;
+    
+    if (isEdit) {
+      success = await flagService.updateFlag(key, flag);
+    } else {
+      success = await flagService.createFlag(key, flag);
+      if (!success) {
+        alert('A flag with this key already exists!');
+        return;
+      }
     }
+    
+    if (success) {
+      showForm.value = false;
+      editingFlag.value = null;
+      loadFlags();
+    } else {
+      alert(`Failed to ${isEdit ? 'update' : 'create'} flag`);
+    }
+  } catch (error) {
+    console.error(`Failed to ${isEdit ? 'update' : 'create'} flag:`, error);
+    alert(`Failed to ${isEdit ? 'update' : 'create'} flag`);
   }
-  
-  showForm.value = false;
-  editingFlag.value = null;
-  loadFlags();
 };
 
 const handleCancelForm = () => {
@@ -97,13 +132,19 @@ const handleExport = () => {
   showExportModal.value = false;
 };
 
-const handleImport = () => {
-  if (flagService.importConfig(importJson.value)) {
-    loadFlags();
-    showImportModal.value = false;
-    importJson.value = '';
-    alert('Flags imported successfully!');
-  } else {
+const handleImport = async () => {
+  try {
+    const success = await flagService.importConfig(importJson.value);
+    if (success) {
+      loadFlags();
+      showImportModal.value = false;
+      importJson.value = '';
+      alert('Flags imported successfully!');
+    } else {
+      alert('Failed to import flags. Please check the JSON format.');
+    }
+  } catch (error) {
+    console.error('Failed to import flags:', error);
     alert('Failed to import flags. Please check the JSON format.');
   }
 };

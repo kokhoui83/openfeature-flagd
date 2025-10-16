@@ -1,0 +1,52 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "welcome-message": {
+      "state": "ENABLED",
+      "variants": {
+        "new": "Welcome to our new feature flag manager!",
+        "classic": "Welcome to the application"
+      },
+      "defaultVariant": "new",
+      "description": "Controls the welcome message displayed to users"
+    },
+    "dark-mode": {
+      "state": "ENABLED",
+      "variants": {
+        "enabled": true,
+        "disabled": false
+      },
+      "defaultVariant": "disabled",
+      "description": "Toggles dark mode theme for the application"
+    },
+    "max-items-per-page": {
+      "state": "ENABLED",
+      "variants": {
+        "small": 10,
+        "medium": 25,
+        "large": 50
+      },
+      "defaultVariant": "medium",
+      "description": "Controls the number of items displayed per page"
+    },
+    "beta-features": {
+      "state": "DISABLED",
+      "variants": {
+        "enabled": true,
+        "disabled": false
+      },
+      "defaultVariant": "disabled",
+      "description": "Enables access to beta features for testing"
+    },
+    "api-rate-limit": {
+      "state": "ENABLED",
+      "variants": {
+        "low": 100,
+        "medium": 500,
+        "high": 1000
+      },
+      "defaultVariant": "medium",
+      "description": "Sets the API rate limit per minute per user"
+    }
+  }
+}

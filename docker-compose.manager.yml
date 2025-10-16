@@ -1,0 +1,41 @@
+services:
+  manager-backend:
+    build: ./manager-backend
+    container_name: flag-manager-backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./manager-backend/data:/app/data
+    environment:
+      - PORT=3001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - flag-manager
+
+  manager-frontend:
+    build: ./manager
+    container_name: flag-manager-frontend
+    ports:
+      - "8081:80"
+    environment:
+      - VITE_API_URL=http://manager-backend:3001
+    depends_on:
+      manager-backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - flag-manager
+
+networks:
+  flag-manager:
+    driver: bridge
+
+volumes:
+  flag-data:
+    driver: local

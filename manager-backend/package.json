@@ -1,0 +1,30 @@
+{
+  "name": "manager-backend",
+  "version": "1.0.0",
+  "description": "Backend API server for the Feature Flag Manager",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "export-flags": "node flags-cli.js export",
+    "import-flags": "node flags-cli.js import",
+    "reset-flags": "node flags-cli.js reset"
+  },
+  "keywords": [
+    "feature-flags",
+    "flagd",
+    "api",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}
