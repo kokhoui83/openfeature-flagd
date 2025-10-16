@@ -16,7 +16,7 @@
         "enabled": true,
         "disabled": false
       },
-      "defaultVariant": "disabled",
+      "defaultVariant": "enabled",
       "description": "Toggles dark mode theme for the application"
     },
     "max-items-per-page": {
