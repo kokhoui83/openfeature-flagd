@@ -46,31 +46,31 @@ async function initializeFlagsFile() {
       "flags": {
         "show-welcome-banner": {
           "state": "ENABLED",
+          "defaultVariant": "off",
           "variants": {
             "on": true,
             "off": false
           },
-          "defaultVariant": "off",
           "description": "Controls whether to show the welcome banner"
         },
         "background-color": {
           "state": "ENABLED",
+          "defaultVariant": "red",
           "variants": {
             "red": "#FF0000",
             "blue": "#0000FF",
             "green": "#00FF00",
             "yellow": "#FFFF00"
           },
-          "defaultVariant": "red",
           "description": "Sets the background color theme"
         },
         "feature-x-enabled": {
           "state": "DISABLED",
+          "defaultVariant": "disabled",
           "variants": {
             "enabled": true,
             "disabled": false
           },
-          "defaultVariant": "disabled",
           "description": "Enables the new feature X functionality"
         }
       }
@@ -79,6 +79,45 @@ async function initializeFlagsFile() {
     await fs.writeFile(FLAGS_FILE_PATH, JSON.stringify(demoData, null, 2));
     console.log(`Initialized flags file with demo data: ${FLAGS_FILE_PATH}`);
   }
+}
+
+// Flag structure normalization helper
+function normalizeFlagStructure(flagData) {
+  const normalized = {
+    "$schema": flagData["$schema"] || "https://flagd.dev/schema/v0/flags.json",
+    "flags": {}
+  };
+
+  for (const [key, flag] of Object.entries(flagData.flags || {})) {
+    // Create a new object with properties in the correct order
+    const normalizedFlag = {};
+    
+    // Add properties in the specific order: state, defaultVariant, variants, then others
+    if (flag.state !== undefined) {
+      normalizedFlag.state = flag.state;
+    }
+    
+    if (flag.defaultVariant !== undefined) {
+      normalizedFlag.defaultVariant = flag.defaultVariant;
+    }
+    
+    if (flag.variants !== undefined) {
+      normalizedFlag.variants = flag.variants;
+    }
+    
+    // Add any other properties (description, targeting, etc.) in alphabetical order for consistency
+    const otherProps = Object.keys(flag)
+      .filter(key => !['state', 'defaultVariant', 'variants'].includes(key))
+      .sort();
+      
+    for (const propKey of otherProps) {
+      normalizedFlag[propKey] = flag[propKey];
+    }
+    
+    normalized.flags[key] = normalizedFlag;
+  }
+  
+  return normalized;
 }
 
 // Validation helper
@@ -130,8 +169,11 @@ app.get('/api/flags', handleAsyncErrors(async (req, res) => {
     const data = await fs.readFile(FLAGS_FILE_PATH, 'utf-8');
     const flags = JSON.parse(data);
     
-    console.log(`Successfully read ${Object.keys(flags.flags || {}).length} flags from file`);
-    res.json(flags);
+    // Normalize the structure to ensure proper property ordering
+    const normalizedFlags = normalizeFlagStructure(flags);
+    
+    console.log(`Successfully read ${Object.keys(normalizedFlags.flags || {}).length} flags from file`);
+    res.json(normalizedFlags);
   } catch (error) {
     console.error('Error reading flags file:', error);
     
@@ -163,6 +205,9 @@ app.post('/api/flags', handleAsyncErrors(async (req, res) => {
       });
     }
     
+    // Normalize the structure to ensure proper property ordering
+    const normalizedFlagsData = normalizeFlagStructure(flagsData);
+    
     // Create backup of existing file
     let backupData = null;
     try {
@@ -173,15 +218,15 @@ app.post('/api/flags', handleAsyncErrors(async (req, res) => {
       console.log('No existing file to backup');
     }
     
-    // Write new data
-    await fs.writeFile(FLAGS_FILE_PATH, JSON.stringify(flagsData, null, 2));
+    // Write normalized data
+    await fs.writeFile(FLAGS_FILE_PATH, JSON.stringify(normalizedFlagsData, null, 2));
     
-    const flagCount = Object.keys(flagsData.flags || {}).length;
-    console.log(`Successfully saved ${flagCount} flags to file`);
+    const flagCount = Object.keys(normalizedFlagsData.flags || {}).length;
+    console.log(`Successfully saved ${flagCount} flags to file with normalized structure`);
     
     res.json({ 
       success: true, 
-      message: `Flags saved successfully. ${flagCount} flags written.`,
+      message: `Flags saved successfully. ${flagCount} flags written with proper structure.`,
       flagCount 
     });
   } catch (error) {
