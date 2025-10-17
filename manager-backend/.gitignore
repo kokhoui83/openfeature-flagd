@@ -39,6 +39,4 @@ Thumbs.db
 *.backup
 backups/
 
-# Don't ignore the initial flags file and CLI tool
-!data/flags.json
-!flags-cli.js
+data/*.json
