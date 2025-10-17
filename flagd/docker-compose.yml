@@ -3,10 +3,13 @@ services:
     image: ghcr.io/open-feature/flagd:latest
     volumes:
       - ./flags:/flags
+      - ./config:/config
     command: [
       'start',
-      '--uri',
-      'file:./flags/demo.flagd.json',
+      '--config',
+      '/config/flagd.yml'
     ]
     ports:
       - '8013:8013'
+      - '8014:8014'  # Metrics port
+      - '8016:8016'  # OFREP port

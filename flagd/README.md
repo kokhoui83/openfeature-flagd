@@ -22,13 +22,33 @@ cp examples/demo.flagd.json flags/demo.flagd.json
 docker-compose up -d
 ```
 
-This will start the flagd service on port `8013` using the flag definitions in `flags/demo.flagd.json`.
+This will start the flagd service using the configuration in `config/flagd.yml`.
+
+### Test the Service
+
+Once running, you can test the flagd services:
+
+```bash
+# Health check (when ports are exposed)
+curl http://localhost:8014/healthz
+
+# Check if main service is accepting connections
+telnet localhost 8013
+
+# OFREP HTTP API (when port is exposed)
+curl http://localhost:8016/ofrep/v1/evaluate/flags/new-welcome-message
+
+# View service logs
+docker logs openfeature-flagd-flagd-1
+```
 
 ## Directory Structure
 
 ```
 flagd/
 ├── docker-compose.yml      # Docker setup for flagd service
+├── config/                 # Configuration files
+│   └── flagd.yml          # Main flagd configuration
 ├── flags/                  # Active flag configurations
 │   └── demo.flagd.json    # Main flag definitions used by flagd
 └── examples/              # Example flag configurations
@@ -72,11 +92,23 @@ This flagd instance is designed to work with:
 
 ## Configuration
 
-The flagd service is configured to:
-- Watch for changes in `/flags/demo.flagd.json`
-- Serve on port `8013`
-- Provide both gRPC and HTTP endpoints
-- Support real-time flag updates
+The flagd service is configured via `config/flagd.yml` with:
+
+### Service Ports
+- **8013**: Main gRPC flag evaluation service
+- **8014**: Metrics and health endpoints
+- **8016**: OFREP (OpenFeature Remote Evaluation Protocol) HTTP API
+
+### Flag Sources
+- **File source**: Watches `/flags/demo.flagd.json` for local flag definitions
+- **HTTP source**: Polls `http://manager-backend:3001/api/flags` for remote flags
+
+### Key Features
+- Real-time flag updates (5-second sync interval)
+- Multiple flag source support
+- CORS enabled for web applications
+- Structured JSON logging
+- Health check endpoints on port 8014
 
 ## Useful Commands
 
