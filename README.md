@@ -16,6 +16,10 @@ rectangle "Manager Frontend" {
 
 rectangle "Manager Backend" {
   [Express API] as ManagerAPI
+
+  database "External Storage" {
+    [JSON Files] as Storage
+  }
 }
 
 rectangle "Client App" {
@@ -28,11 +32,10 @@ rectangle "Server Backend" {
 
 rectangle "Feature Flag Service" {
   [flagd] as Flagd
+
+  [JSON Files] as Local
 }
 
-database "Flag Storage" {
-  [JSON Files] as Storage
-}
 
 Admin --> Manager: Manage flags
 Manager --> ManagerAPI: CRUD operations
@@ -41,7 +44,9 @@ ManagerAPI --> Storage: Read/Write flags
 User --> Client: Use application
 Client --> Server: API requests
 Server --> Flagd: Check flags
-Flagd --> Storage: Read flag config
+Client --> Flagd: Check flags
+Flagd --> ManagerAPI: Read flag config
+Flagd --> Local: Read flag config
 
 ```
 
