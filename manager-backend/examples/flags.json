@@ -1,0 +1,29 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "new-welcome-message": {
+      "state": "ENABLED",
+      "defaultVariant": "true",
+      "variants": {
+        "true": true,
+        "false": false
+      }
+    },
+    "show-beta-button": {
+      "state": "ENABLED",
+      "defaultVariant": "true",
+      "variants": {
+        "true": true,
+        "false": false
+      }
+    },
+    "dark-mode": {
+      "state": "ENABLED",
+      "defaultVariant": "true",
+      "variants": {
+        "true": true,
+        "false": false
+      }
+    }
+  }
+}

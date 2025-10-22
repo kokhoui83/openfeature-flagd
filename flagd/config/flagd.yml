@@ -1,0 +1,36 @@
+# Flagd Configuration File
+# See: https://flagd.dev/reference/configuration/
+
+# Service configuration
+port: 8013
+host: "0.0.0.0"
+
+# Logging configuration
+logLevel: info
+logFormat: json
+
+# Metrics and monitoring
+metricsPort: 8014
+ofrep:
+  port: 8016
+
+# Flag sources
+sources:
+  - uri: "file:./flags/demo.flagd.json"
+    provider: "file"
+  - uri: "http://manager-backend:3001/api/flags"
+    provider: "http"
+    interval: 5
+
+# CORS configuration
+cors:
+  - origin: "*"
+
+# Flag sync configuration
+sync:
+  interval: 5
+
+# Evaluation context
+evaluationContext:
+  default:
+    environment: "development"
